@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/prakhar-kt/render"
+	"github.com/prakhar-kt/go-webapp/pkg/render"
 )
 
 // Home is the handler for the home page

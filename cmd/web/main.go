@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/prakhar-kt/go-webapp/handlers"
+	"github.com/prakhar-kt/go-webapp/pkg/handlers"
 )
 
 const portNumber = ":8080"
