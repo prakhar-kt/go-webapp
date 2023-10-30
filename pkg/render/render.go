@@ -6,16 +6,35 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/prakhar-kt/go-webapp/pkg/config"
+
+	"github.com/prakhar-kt/go-webapp/pkg/models"
 )
 
+var app *config.AppConfig
+
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
+
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
 // RenderTemplate renders a template
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
+func RenderTemplate(w http.ResponseWriter, tmpl string, templateData *models.TemplateData) {
 
-	// create a template cache
-	templateCache, err := createTemplateCache()
+	var templateCache map[string]*template.Template
 
-	if err != nil {
-		log.Fatal(err)
+	if app.UseCache {
+
+		// create a template cache
+		templateCache = app.TemplateCache
+
+	} else {
+		templateCache, _ = CreateTemplateCache()
+
 	}
 
 	// get the requested template from the cache
@@ -23,7 +42,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	template, ok := templateCache[tmpl]
 
 	if !ok {
-		log.Fatal(err)
+		log.Fatal("Could  not get template from the cache")
 	}
 
 	// create a new buffer to store the template execution
@@ -31,7 +50,9 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 
 	// store the template in the buffer
 
-	err = template.Execute(buf, nil)
+	templateData = AddDefaultData(templateData)
+
+	err := template.Execute(buf, templateData)
 
 	if err != nil {
 
@@ -47,7 +68,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 
 }
 
-func createTemplateCache() (map[string]*template.Template, error) {
+func CreateTemplateCache() (map[string]*template.Template, error) {
 
 	// create an empty templates Cache
 	tempCache := map[string]*template.Template{}
