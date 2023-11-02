@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -13,16 +14,22 @@ import (
 
 const portNumber = ":8080"
 
+var app config.AppConfig
+var session *scs.SessionManager
+
 // main is the main function
 func main() {
 
-	var app config.AppConfig
+	// change to true in production
+	app.InProduction = false
 
-	session := scs.New()
+	session = scs.New()
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
-	session.Cookie.Secure = false
+	session.Cookie.Secure = app.InProduction
+
+	app.Session = session
 
 	templateCache, err := render.CreateTemplateCache()
 
@@ -46,6 +53,8 @@ func main() {
 		Addr:    portNumber,
 		Handler: routes(&app),
 	}
+
+	fmt.Println("Starting server on port 8080")
 
 	err = srv.ListenAndServe()
 
